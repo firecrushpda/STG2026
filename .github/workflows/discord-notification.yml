@@ -1,6 +1,9 @@
 - name: Send message to Discord
+  shell: bash
   env:
     DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
   run: |
-    payload=$(jq -n --arg content "Push by $GITHUB_ACTOR on $GITHUB_REF_NAME: $GITHUB_SHA" '{content: $content}')
-    curl -sS -H "Content-Type: application/json" -d "$payload" "$DISCORD_WEBHOOK"
+    set -euo pipefail
+    payload="{\"content\":\"Push by ${GITHUB_ACTOR} on ${GITHUB_REF_NAME}: ${GITHUB_SHA}\"}"
+    echo "payload=$payload"
+    curl -v -H "Content-Type: application/json" -d "$payload" "$DISCORD_WEBHOOK"
