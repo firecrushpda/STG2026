@@ -1,6 +1,6 @@
-- name: Discord notification
-  uses: Ilshidur/action-discord@master
+- name: Send message to Discord
   env:
     DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-  with:
-    args: "New push by ${{ github.actor }}"
+  run: |
+    payload=$(jq -n --arg content "Push by $GITHUB_ACTOR on $GITHUB_REF_NAME: $GITHUB_SHA" '{content: $content}')
+    curl -sS -H "Content-Type: application/json" -d "$payload" "$DISCORD_WEBHOOK"
