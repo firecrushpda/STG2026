@@ -1,12 +1,15 @@
-- name: Send Discord notify
+- name: Send message to Discord
+  shell: bash
   env:
     DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-    ACTOR: ${{ github.actor }}
-    BRANCH: ${{ github.ref_name }}
-    SHA: ${{ github.sha }}
-    REPO: ${{ github.repository }}
   run: |
-    msg="✅ Push on ${REPO}\n- by: ${ACTOR}\n- branch: ${BRANCH}\n- sha: ${SHA}"
-    curl -sS -H "Content-Type: application/json" \
-      -d "{\"content\":\"$(echo "$msg" | sed 's/"/\\"/g')\"}" \
-      "$DISCORD_WEBHOOK"
+    set -euo pipefail
+
+    echo "GITHUB_ACTOR=$GITHUB_ACTOR"
+    echo "GITHUB_REF_NAME=$GITHUB_REF_NAME"
+    echo "GITHUB_SHA=$GITHUB_SHA"
+
+    payload=$(jq -n --arg content "Push by $GITHUB_ACTOR on $GITHUB_REF_NAME: $GITHUB_SHA" '{content: $content}')
+    echo "payload=$payload"
+
+    curl -v -H "Content-Type: application/json" -d "$payload" "$DISCORD_WEBHOOK"
